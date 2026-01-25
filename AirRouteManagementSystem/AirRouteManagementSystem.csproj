@@ -32,7 +32,6 @@
 		<Folder Include="Areas\Customer\" />
 		<Folder Include="Areas\Identity\" />
 		<Folder Include="Services\Interface\" />
-		<Folder Include="Utilities\Interface\" />
 	</ItemGroup>
 
 </Project>
