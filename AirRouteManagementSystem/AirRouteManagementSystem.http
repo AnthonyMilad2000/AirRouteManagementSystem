@@ -1,0 +1,6 @@
+@AirRouteManagementSystem_HostAddress = http://localhost:5220
+
+GET {{AirRouteManagementSystem_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
