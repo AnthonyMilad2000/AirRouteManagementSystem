@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace AirRouteManagementSystem.Reposatory.IReposatory
+namespace AirRouteManagementSystem.Repository.IRepository
 {
-    public interface IReposatory<T>
+    public interface IRepository<T>
     {
         public Task<T> CreateAsync(T entity, CancellationToken cancellationToken);
         public void Remove(T entity) ;

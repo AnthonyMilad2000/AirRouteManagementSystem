@@ -1,17 +1,16 @@
 ﻿using AirRouteManagementSystem.DateAccess.Context;
-using AirRouteManagementSystem.Reposatory.IReposatory;
+using AirRouteManagementSystem.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace AirRouteManagementSystem.Reposatory
 {
-    public class Reposatory<T>: IReposatory<T> where T : class
+    public class Repository<T>: IRepository<T> where T : class
     {
         private readonly ApplicationDBContext _dBContext;
         public DbSet<T> _dbSet;
 
-        public Reposatory(ApplicationDBContext dBContext)
+        public Repository(ApplicationDBContext dBContext)
         {
             _dBContext = dBContext;
             _dbSet =  _dBContext.Set<T>();
