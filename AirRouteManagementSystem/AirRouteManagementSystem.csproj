@@ -24,4 +24,10 @@
     <PackageReference Include="Scalar.AspNetCore" Version="2.12.18" />
   </ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Areas\Admin\" />
+	  <Folder Include="Areas\Customer\" />
+	  <Folder Include="Areas\Identity\" />
+	</ItemGroup>
+
 </Project>
