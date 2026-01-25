@@ -1,5 +1,7 @@
 
 using AirRouteManagementSystem.DateAccess.Context;
+using AirRouteManagementSystem.Model;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace AirRouteManagementSystem
@@ -24,6 +26,17 @@ namespace AirRouteManagementSystem
             //Dependency Injection
             builder.Services.RegisterConfig();
 
+            // Identity
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(option =>
+            {
+                option.User.RequireUniqueEmail = true;
+                option.Password.RequiredLength = 10;
+                option.Password.RequireNonAlphanumeric = false;
+                option.SignIn.RequireConfirmedEmail = true;
+            })
+            .AddEntityFrameworkStores<ApplicationDBContext>()
+            .AddDefaultTokenProviders();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -34,6 +47,7 @@ namespace AirRouteManagementSystem
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

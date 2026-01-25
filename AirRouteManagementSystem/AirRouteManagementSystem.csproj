@@ -1,10 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>9c500595-e522-4a60-86e6-28e62c29def3</UserSecretsId>
+
+	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Mapster" Version="7.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="9.0.11" />
@@ -20,14 +23,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
-    <PackageReference Include="Scalar.AspNetCore" Version="2.12.18" />
-  </ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
+		<PackageReference Include="Scalar.AspNetCore" Version="2.12.18" />
+	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Areas\Admin\" />
-	  <Folder Include="Areas\Customer\" />
-	  <Folder Include="Areas\Identity\" />
+		<Folder Include="Areas\Admin\" />
+		<Folder Include="Areas\Customer\" />
+		<Folder Include="Areas\Identity\" />
+		<Folder Include="Services\Interface\" />
+		<Folder Include="Utilities\Interface\" />
 	</ItemGroup>
 
 </Project>
