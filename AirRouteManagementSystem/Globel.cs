@@ -1,4 +1,5 @@
 ﻿global using AirRouteManagementSystem.UnitOfWork.Interface;
 global using AirRouteManagementSystem.UnitOfWork;
 global using AirRouteManagementSystem.DateAccess.Context;
-global using AirRouteManagementSystem.Utilities.Interface;
+global using AirRouteManagementSystem.DBSeder.Interface;
+global using AirRouteManagementSystem.DBSeder;

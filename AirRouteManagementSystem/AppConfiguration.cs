@@ -10,6 +10,9 @@ namespace AirRouteManagementSystem
         {
            // Email Sender
             services.AddTransient<IEmailSender,EmailSender>();
+
+            // DBInitializar
+            services.AddScoped<IDBInitializar, DBInitializar>();
         }
     }
 }

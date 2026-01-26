@@ -39,6 +39,24 @@ namespace AirRouteManagementSystem
 
             var app = builder.Build();
 
+            // Initialization logic within a scope:
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var initializer = services.GetRequiredService<IDBInitializar>();
+                    // Call an initialization method
+                    initializer.Initialiaze();
+                }
+                catch (Exception ex)
+                {
+                    // Handle potential errors like database connection failures
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while initializing the database.");
+                }
+            }
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
