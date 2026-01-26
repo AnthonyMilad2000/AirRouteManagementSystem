@@ -1,4 +1,6 @@
-﻿using AirRouteManagementSystem.Repository.IRepository;
+﻿using AirRouteManagementSystem.Model;
+using AirRouteManagementSystem.Reposatory;
+using AirRouteManagementSystem.Repository.IRepository;
 using AirRouteManagementSystem.Utilities;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
@@ -13,6 +15,8 @@ namespace AirRouteManagementSystem
 
             // DBInitializar
             services.AddScoped<IDBInitializar, DBInitializar>();
+            services.AddScoped<IRepository<Airport>, Repository<Airport>>();
+            services.AddScoped<IUnitOfWork, UnitOfWorks>();
         }
     }
 }
