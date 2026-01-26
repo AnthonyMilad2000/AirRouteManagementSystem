@@ -28,7 +28,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Areas\Admin\" />
+		<Folder Include="Areas\Admin\Controllers\" />
 		<Folder Include="Areas\Customer\" />
 		<Folder Include="Areas\Identity\" />
 		<Folder Include="Services\Interface\" />
