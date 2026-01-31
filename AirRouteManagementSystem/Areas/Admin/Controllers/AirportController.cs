@@ -119,7 +119,11 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
         {
             var airport = await _airportRepository.GetOneAsync(e => e.Id == id, cancellationToken: cancellationToken);
             if (airport is null)
-                return NotFound();
+                return NotFound(new ErrorModel
+                {
+                    Code = "Airport Not Found",
+                    Description = "Airport Not Found",
+                });
 
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "airport_images");
             var oldImgPath = Path.Combine(uploadsFolder, airport.Image ?? "");

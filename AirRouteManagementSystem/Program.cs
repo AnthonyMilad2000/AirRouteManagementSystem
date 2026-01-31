@@ -39,6 +39,7 @@ namespace AirRouteManagementSystem
 
             var app = builder.Build();
 
+            app.UseStaticFiles();
             // Initialization logic within a scope:
             using (var scope = app.Services.CreateScope())
             {
