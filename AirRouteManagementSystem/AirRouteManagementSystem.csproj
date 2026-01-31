@@ -28,11 +28,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Areas\Admin\Controllers\" />
 		<Folder Include="Areas\Customer\" />
 		<Folder Include="Areas\Identity\" />
-		<Folder Include="DTOs\Response\" />
 		<Folder Include="Services\Interface\" />
+		<Folder Include="wwwroot\aircraft_images\" />
+		<Folder Include="wwwroot\airport_images\" />
 	</ItemGroup>
 
 </Project>

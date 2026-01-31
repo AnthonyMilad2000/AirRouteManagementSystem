@@ -33,5 +33,7 @@ namespace AirRouteManagementSystem.Model
         public TimeSpan Duration { get; set; }
 
         public FlightStatus Status { get; set; }
+
+        public List<FlightPrice>? FlightPrice { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using AirRouteManagementSystem.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 
 namespace AirRouteManagementSystem
 {
@@ -38,6 +39,7 @@ namespace AirRouteManagementSystem
 
             var app = builder.Build();
 
+            app.UseStaticFiles();
             // Initialization logic within a scope:
             using (var scope = app.Services.CreateScope())
             {
@@ -60,6 +62,8 @@ namespace AirRouteManagementSystem
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
+                app.MapScalarApiReference();
+
             }
 
             app.UseHttpsRedirection();

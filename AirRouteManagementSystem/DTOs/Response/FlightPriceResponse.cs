@@ -1,16 +1,10 @@
-﻿namespace AirRouteManagementSystem.Model
-{
-    public enum SeatClass
-    {
-        Economy,
-        Business,
-        FirstClass
-    }
+﻿using AirRouteManagementSystem.Model;
 
-    public class FlightPrice
+namespace AirRouteManagementSystem.DTOs.Response
+{
+    public class FlightPriceResponse
     {
         public int Id { get; set; }
-        public int FlightId { get; set; }
         public SeatClass SeatClass { get; set; }
         public int MinSeats { get; set; }
         public int MaxSeats { get; set; }

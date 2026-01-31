@@ -2,11 +2,11 @@
 
 namespace AirRouteManagementSystem.UnitOfWork
 {
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWorks : IUnitOfWork
     {
         private readonly ApplicationDBContext _dBContext;
 
-        public UnitOfWork(ApplicationDBContext dBContext)
+        public UnitOfWorks(ApplicationDBContext dBContext)
         {
             _dBContext = dBContext;
         }

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace AirRouteManagementSystem.Reposatory
+namespace AirRouteManagementSystem.Repository
 {
     public class Repository<T>: IRepository<T> where T : class
     {
