@@ -1,5 +1,7 @@
-﻿using Google.Apis.Auth;
+﻿using AirRouteManagementSystem.DTOs.Response;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.IdentityModel.Tokens;
 using Stripe;
@@ -403,7 +405,7 @@ namespace AirRouteManagementSystem.Services
             }
 
             var AccessjwtToken = await _tokenService.GenerateJwtTokenAsync(user);
-            var RefreshjwtToken =  _tokenService.GenerateRefreshToken();
+            var RefreshjwtToken = _tokenService.GenerateRefreshToken();
 
             user.RefreshToken = RefreshjwtToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
@@ -458,7 +460,7 @@ namespace AirRouteManagementSystem.Services
                 await _userManager.CreateAsync(user);
             }
 
-           
+
             var Accesstoken = await _tokenService.GenerateJwtTokenAsync(user);
             var RefreshjwtToken = _tokenService.GenerateRefreshToken();
 
@@ -471,7 +473,7 @@ namespace AirRouteManagementSystem.Services
                 IsSuccess = true,
                 Message = "Login with Facebook successful",
                 AccessToken = Accesstoken,
-                RefreshToken= RefreshjwtToken,
+                RefreshToken = RefreshjwtToken,
                 RefreshTokenExpiryTime = user.RefreshTokenExpiryTime,
                 ExpiresAt = DateTime.UtcNow.AddMinutes(30).ToString()
             };

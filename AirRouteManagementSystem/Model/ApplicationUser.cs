@@ -6,5 +6,7 @@ namespace AirRouteManagementSystem.Model
     {
         public string Name { get; set; }=string.Empty;
         public string Address { get; set; }=string.Empty;
+        public string? RefreshToken { get; set; }
+        public DateTime RefreshTokenExpiryTime { get; set; }
     }
 }

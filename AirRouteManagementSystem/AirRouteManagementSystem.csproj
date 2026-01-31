@@ -9,9 +9,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Google.Apis.Auth" Version="1.73.0" />
 		<PackageReference Include="Mapster" Version="7.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="9.0.11" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.12" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.11" />
@@ -19,8 +21,10 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="OpenAI" Version="2.8.0" />
 		<PackageReference Include="Stripe.net" Version="50.2.0" />
 	</ItemGroup>
+
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
