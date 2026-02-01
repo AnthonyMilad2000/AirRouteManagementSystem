@@ -11,4 +11,5 @@ global using AirRouteManagementSystem.Model;
 global using AirRouteManagementSystem.DTOs.Request;
 global using AirRouteManagementSystem.Utilities;
 global using AirRouteManagementSystem.DTOs.Response;
+global using AirRouteManagementSystem.Reposatory;
 global using System.ComponentModel.DataAnnotations;
