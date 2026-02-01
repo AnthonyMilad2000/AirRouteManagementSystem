@@ -8,10 +8,10 @@ namespace AirRouteManagementSystem
 {
     public static class AppConfiguration
     {
-        public static void RegisterConfig(this IServiceCollection services) 
+        public static void RegisterConfig(this IServiceCollection services)
         {
            // Email Sender
-            services.AddTransient<IEmailSender,EmailSender>();
+            services.AddTransient<IEmailSender, EmailSender>();
 
             // DBInitializar
             services.AddScoped<IDBInitializar, DBInitializar>();
