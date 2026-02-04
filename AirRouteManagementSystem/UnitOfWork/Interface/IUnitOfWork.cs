@@ -1,7 +1,11 @@
-﻿namespace AirRouteManagementSystem.UnitOfWork.Interface
+﻿using AirRouteManagementSystem.Repository.IRepository;
+
+namespace AirRouteManagementSystem.UnitOfWork.Interface
 {
     public interface IUnitOfWork
     {
-       public Task Commit();
+        public IRepository<ApplicationUserOTP> ApplicationUserOTPrepository { get; }
+
+        public Task Commit();
     }
 }

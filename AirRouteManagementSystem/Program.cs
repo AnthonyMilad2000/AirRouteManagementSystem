@@ -1,8 +1,9 @@
-
-using AirRouteManagementSystem.Model;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using System.Text;
 
 namespace AirRouteManagementSystem
 {
@@ -12,65 +13,115 @@ namespace AirRouteManagementSystem
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // ===============================
+            // Add services
+            // ===============================
 
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
-            // database configuration
+            // ===============================
+            // Database
+            // ===============================
             builder.Services.AddDbContext<ApplicationDBContext>(options =>
-               options.UseSqlServer(
-            builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("DefaultConnection")
+                )
+            );
 
-            //Dependency Injection
+            // ===============================
+            // Dependency Injection
+            // ===============================
             builder.Services.RegisterConfig();
 
+            // ===============================
             // Identity
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(option =>
+            // ===============================
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
-                option.User.RequireUniqueEmail = true;
-                option.Password.RequiredLength = 10;
-                option.Password.RequireNonAlphanumeric = false;
-                option.SignIn.RequireConfirmedEmail = true;
+                options.User.RequireUniqueEmail = true;
+                options.Password.RequiredLength = 10;
+                options.Password.RequireNonAlphanumeric = false;
+                options.SignIn.RequireConfirmedEmail = true;
             })
             .AddEntityFrameworkStores<ApplicationDBContext>()
             .AddDefaultTokenProviders();
 
+            // ===============================
+            // Authentication (JWT + Google)
+            // ===============================
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateAudience = true,
+                    ValidateIssuer = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+
+                    ValidIssuer = builder.Configuration["JWT:Issuer"],
+                    ValidAudience = builder.Configuration["JWT:Audience"],
+
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]!)
+                    )
+                };
+            })
+            .AddGoogle(options =>
+            {
+                options.ClientId =
+                    builder.Configuration["Authentication:Google:ClientId"]!;
+                options.ClientSecret =
+                    builder.Configuration["Authentication:Google:ClientSecret"]!;
+            }).AddFacebook(options =>
+            {
+                options.AppId =
+                    builder.Configuration["Authentication:Facebook:AppId"]!;
+                options.AppSecret =
+                    builder.Configuration["Authentication:Facebook:AppSecret"]!;
+            });
+
+            // ===============================
+            // Build app
+            // ===============================
             var app = builder.Build();
 
-            app.UseStaticFiles();
-            // Initialization logic within a scope:
+            // ===============================
+            // DB Initialize
+            // ===============================
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
                 try
                 {
                     var initializer = services.GetRequiredService<IDBInitializar>();
-                    // Call an initialization method
                     initializer.Initialiaze();
                 }
                 catch (Exception ex)
                 {
-                    // Handle potential errors like database connection failures
                     var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while initializing the database.");
+                    logger.LogError(ex, "Error while initializing database");
                 }
             }
 
-            // Configure the HTTP request pipeline.
+            // ===============================
+            // Middleware
+            // ===============================
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
                 app.MapScalarApiReference();
-
             }
 
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 
