@@ -37,7 +37,7 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOne(int id, CancellationToken cancellationToken) 
         {
-            var aircraft = await _aircraftRepository.GetOneAsync(e=>e.Id == id, Include: [e=>e.SubImages],cancellationToken: cancellationToken);
+            var aircraft = await _aircraftRepository.GetOneAsync(e=>e.Id == id, Include: [e=>e.SubImages!],cancellationToken: cancellationToken);
             if (aircraft is null)
                 return NotFound(new ErrorModel
                 {
@@ -102,7 +102,7 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(int id,AircraftRequest aircraftRequest, List<IFormFile> SubImgs, CancellationToken cancellationToken)
         {
-           var aircraftInDb =await _aircraftRepository.GetOneAsync(e=>e.Id == id, Include: [e=>e.SubImages],cancellationToken: cancellationToken);
+           var aircraftInDb =await _aircraftRepository.GetOneAsync(e=>e.Id == id, Include: [e=>e.SubImages!],cancellationToken: cancellationToken);
             if (aircraftInDb is null)
                 return NotFound(new ErrorModel
                 {
@@ -116,7 +116,7 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
 
 
 
-                var oldImgPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\aircraft_images", aircraftInDb.Image);
+                var oldImgPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\aircraft_images", aircraftInDb.Image!);
 
                 if (System.IO.File.Exists(oldImgPath))
                 {
