@@ -41,7 +41,7 @@ namespace AirRouteManagementSystem.DataAccess.Migrations
 
                     b.HasIndex("AirCraftId");
 
-                    b.ToTable("AirCraftSubImgs");
+                    b.ToTable("AirCraftSubImgs", (string)null);
                 });
 
             modelBuilder.Entity("AirRouteManagementSystem.Model.Aircraft", b =>
@@ -76,7 +76,7 @@ namespace AirRouteManagementSystem.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Aircrafts");
+                    b.ToTable("Aircrafts", (string)null);
                 });
 
             modelBuilder.Entity("AirRouteManagementSystem.Model.Airport", b =>
@@ -102,7 +102,7 @@ namespace AirRouteManagementSystem.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Airports");
+                    b.ToTable("Airports", (string)null);
                 });
 
             modelBuilder.Entity("AirRouteManagementSystem.Model.ApplicationUser", b =>
@@ -223,7 +223,7 @@ namespace AirRouteManagementSystem.DataAccess.Migrations
 
                     b.HasIndex("ToAirportId");
 
-                    b.ToTable("Flights");
+                    b.ToTable("Flights", (string)null);
                 });
 
             modelBuilder.Entity("AirRouteManagementSystem.Model.FlightPrice", b =>
@@ -253,7 +253,7 @@ namespace AirRouteManagementSystem.DataAccess.Migrations
 
                     b.HasIndex("FlightId");
 
-                    b.ToTable("FlightPrices");
+                    b.ToTable("FlightPrices", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

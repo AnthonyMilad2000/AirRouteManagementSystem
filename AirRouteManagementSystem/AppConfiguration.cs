@@ -2,8 +2,10 @@
 using AirRouteManagementSystem.Repository;
 using AirRouteManagementSystem.Repository.IRepository;
 using AirRouteManagementSystem.Services;
+using AirRouteManagementSystem.SignalR;
 using AirRouteManagementSystem.Utilities;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.SignalR;
 
 namespace AirRouteManagementSystem
 {
@@ -29,7 +31,8 @@ namespace AirRouteManagementSystem
             services.AddTransient<ITokenService, TokenService>();
             services.AddScoped<IAccountServices, AccountService>();
             services.AddHttpClient();
-
+            services.AddSingleton<IUserIdProvider, UserIdProvider>();
+            services.AddSignalR();
             //Open AI
             services.AddHttpClient<IOpenAiService, OpenAiService>();
         }

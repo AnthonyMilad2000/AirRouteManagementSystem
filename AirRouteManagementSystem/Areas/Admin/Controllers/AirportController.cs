@@ -25,11 +25,39 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> Get(
+    int page = 1,
+    int pageSize = 10,
+    string? search = null,
+    CancellationToken cancellationToken = default)
         {
-            var airports = await _airportRepository.GetAsync(tracking: false,cancellationToken: cancellationToken);
-            return Ok(airports.AsQueryable());
+            var query = (await _airportRepository.GetAsync(tracking: false, cancellationToken: cancellationToken))
+                        .AsQueryable();
+
+            // Search
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(a => a.Name.Contains(search));
+            }
+
+            var total = query.Count();
+
+            var data = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var result = new PagedResponse<Airport>
+            {
+                Data = data,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = total
+            };
+
+            return Ok(result);
         }
+
         [HttpGet("id")]
         public async Task<IActionResult> GetOne(int id,CancellationToken cancellationToken)
         {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -218,6 +219,19 @@ namespace AirRouteManagementSystem.Areas.Identity.Controllers
         }
 
 
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByIdAsync(userId!);
 
+            user!.RefreshToken = null;
+            user.RefreshTokenExpiryTime = DateTime.MinValue;
+
+            await _userManager.UpdateAsync(user);
+
+            return Ok();
+        }
     }
 }

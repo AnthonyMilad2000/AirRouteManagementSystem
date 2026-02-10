@@ -1,11 +1,7 @@
-﻿using AirRouteManagementSystem.DTOs.Request;
-using AirRouteManagementSystem.DTOs.Response;
-using AirRouteManagementSystem.Model;
+﻿
 using AirRouteManagementSystem.Repository.IRepository;
 using Mapster;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace AirRouteManagementSystem.Areas.Admin.Controllers
 {
@@ -27,11 +23,40 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken) 
+        public async Task<IActionResult> Get(
+      int page = 1,
+      int pageSize = 10,
+      string? search = null,
+      CancellationToken cancellationToken = default)
         {
-            var aircrafts = await _aircraftRepository.GetAsync(tracking: false, cancellationToken: cancellationToken);
-            return Ok(aircrafts.AsQueryable());
+            var query = _aircraftRepository
+                .GetAsync(tracking: false, cancellationToken: cancellationToken)
+                .Result
+                .AsQueryable();
 
+            // Search
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(a => a.AircraftCode.Contains(search)
+                                      || a.AircraftCode.Contains(search));
+            }
+
+            var total = query.Count();
+
+            var data = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var result = new PagedResponse<Aircraft>
+            {
+                Data = data,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = total
+            };
+
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -100,32 +125,38 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
 
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Edit(int id,AircraftRequest aircraftRequest, List<IFormFile> SubImgs, CancellationToken cancellationToken)
+        public async Task<IActionResult> Edit(int id, AircraftRequest aircraftRequest, List<IFormFile> SubImgs, CancellationToken cancellationToken)
         {
-           var aircraftInDb =await _aircraftRepository.GetOneAsync(e=>e.Id == id, Include: [e=>e.SubImages!],cancellationToken: cancellationToken);
+            var aircraftInDb = await _aircraftRepository.GetOneAsync(
+                e => e.Id == id,
+                Include: [e => e.SubImages!],
+                cancellationToken: cancellationToken
+            );
+
             if (aircraftInDb is null)
                 return NotFound(new ErrorModel
                 {
                     Code = "Aircraft Not Found",
                     Description = "Aircraft Not Found !!"
                 });
+
             if (aircraftRequest.Image != null && aircraftRequest.Image.Length > 0)
             {
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(aircraftRequest.Image.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\aircraft_images", fileName);
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "aircraft_images", fileName);
 
-
-
-                var oldImgPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\aircraft_images", aircraftInDb.Image!);
-
-                if (System.IO.File.Exists(oldImgPath))
+                if (!string.IsNullOrEmpty(aircraftInDb.Image))
                 {
-                    System.IO.File.Delete(oldImgPath);
+                    var oldImgPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "aircraft_images", aircraftInDb.Image);
+                    if (System.IO.File.Exists(oldImgPath))
+                    {
+                        System.IO.File.Delete(oldImgPath);
+                    }
                 }
 
                 using (var stream = System.IO.File.Create(filePath))
                 {
-                    aircraftRequest.Image.CopyTo(stream);
+                    await aircraftRequest.Image.CopyToAsync(stream, cancellationToken);
                 }
 
                 aircraftInDb.Image = fileName;
@@ -136,11 +167,7 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
                 foreach (var item in SubImgs)
                 {
                     var fileName = Guid.NewGuid() + Path.GetExtension(item.FileName);
-                    var filePath = Path.Combine(
-                        Directory.GetCurrentDirectory(),
-                        "wwwroot\\aircraft_images",
-                        fileName
-                    );
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "aircraft_images", fileName);
 
                     using var stream = System.IO.File.Create(filePath);
                     await item.CopyToAsync(stream, cancellationToken);
@@ -148,16 +175,17 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
                     await _aircraftSubImagesRepository.CreateAsync(new AirCraftSubImg
                     {
                         SubImagePath = fileName,
-                        AirCraftId = aircraftInDb.Id  
+                        AirCraftId = aircraftInDb.Id
                     }, cancellationToken);
                 }
             }
 
-
             aircraftInDb.AircraftType = aircraftRequest.AircraftType;
             aircraftInDb.CapacityType = aircraftRequest.CapacityType;
+            aircraftInDb.Capacity = aircraftRequest.Capacity;
             aircraftInDb.MaxRangeKm = aircraftRequest.MaxRangeKm;
             aircraftInDb.MaxWeight = aircraftRequest.MaxWeight;
+
             _aircraftRepository.Update(aircraftInDb);
             await _unitOfWork.Commit();
 

@@ -15,7 +15,7 @@ namespace AirRouteManagementSystem.DataAccess.Context
         public DbSet<Aircraft> Aircrafts { get; set; }
         public DbSet<AirCraftSubImg> AirCraftSubImgs { get; set; }
         public DbSet<FlightPrice> FlightPrices { get; set; }
-
+        public DbSet<ApplicationUserOTP> ApplicationUserOTPs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

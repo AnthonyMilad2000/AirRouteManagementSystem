@@ -26,11 +26,38 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken) 
+        public async Task<IActionResult> Get(
+     int page = 1,
+     int pageSize = 10,
+     string? search = null,
+     CancellationToken cancellationToken = default)
         {
-            var flights = await _flightRepository.GetAsync(Include: [e=>e.FlightPrice],cancellationToken: cancellationToken);
+            var query = (await _flightRepository.GetAsync(Include: new Expression<Func<Flight, object>>[] { e => e.FlightPrice },
+                                                           cancellationToken: cancellationToken))
+                        .AsQueryable();
 
-            return Ok(flights.AsQueryable());
+            // Search على رقم الرحلة أو أي حقل تحبه
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(f => f.FlightNumber.Contains(search));
+            }
+
+            var total = query.Count();
+
+            var data = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var result = new PagedResponse<Flight>
+            {
+                Data = data,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = total
+            };
+
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -95,6 +122,13 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
                     Description = "Flight Not Found"
                 });
 
+            flight.FromAirportId = flightRequest.FromAirportId;
+            flight.ToAirportId = flightRequest.ToAirportId;
+            flight.Distance = flightRequest.Distance;
+            flight.DepartureTime = flightRequest.DepartureTime;
+            flight.ArrivalTime = flightRequest.ArrivalTime;
+            flight.Duration = flightRequest.Duration;
+            flight.Status = flightRequest.Status;
 
             if (flightRequest.FlightPrice is not null && flightRequest.FlightPrice.Any())
             {
