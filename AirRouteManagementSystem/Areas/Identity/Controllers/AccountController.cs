@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AirRouteManagementSystem.Repository.IRepository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,13 +17,15 @@ namespace AirRouteManagementSystem.Areas.Identity.Controllers
         private readonly IAccountServices _accountServices;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private IRepository<ApplicationUser> _userRepository;
 
         public AccountController(IAccountServices accountServices,
-            UserManager<ApplicationUser> userManager,SignInManager<ApplicationUser> signInManager)
+            UserManager<ApplicationUser> userManager,SignInManager<ApplicationUser> signInManager, IRepository<ApplicationUser> applicationUserRepository)
         {
             _accountServices = accountServices;
             _userManager = userManager;
             _signInManager = signInManager;
+            _userRepository = applicationUserRepository;
         }
 
         [HttpPost]
@@ -233,5 +236,42 @@ namespace AirRouteManagementSystem.Areas.Identity.Controllers
 
             return Ok();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Get(int page = 1, int pageSize = 10, string? search = null, CancellationToken cancellationToken = default)
+        {
+            var users = await _userRepository.GetAsync(tracking: false, cancellationToken: cancellationToken);
+
+            var query = users.AsQueryable();
+
+            if (users is null)
+                return NotFound(new ErrorModel { 
+                Code = "Not Found",
+                Description = "No User Found",
+                });
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(a => a.Name.Contains(search));
+            }
+
+            var total = query.Count();
+
+            var data = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var result = new PagedResponse<ApplicationUser>
+            {
+                Data = data,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = total
+            };
+
+            return Ok(result);
+        }
+
     }
 }

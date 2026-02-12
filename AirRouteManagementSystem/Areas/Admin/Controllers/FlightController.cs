@@ -2,6 +2,7 @@
 using AirRouteManagementSystem.DTOs.Response;
 using AirRouteManagementSystem.Model;
 using AirRouteManagementSystem.Repository.IRepository;
+using AirRouteManagementSystem.Services;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq.Expressions;
@@ -15,28 +16,29 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
     public class FlightController : ControllerBase
     {
         private IRepository<Flight> _flightRepository;
+        private IRepository<Airport> _airportRepository;
         private IUnitOfWork _unitOfWork;
         private IRepository<FlightPrice> _flightPriceRepository;
+        private IFlightPriceRepository _iFlightPriceRepository;
+        private ILocationService _locationService;
 
-        public FlightController(IRepository<Flight> flightRepository, IUnitOfWork unitOfWork, IRepository<FlightPrice> flightPriceRepository)
+        public FlightController(IRepository<Flight> flightRepository, IUnitOfWork unitOfWork, IRepository<FlightPrice> flightPriceRepository, IFlightPriceRepository iFlightPriceRepository, IRepository<Airport> airportRepository, ILocationService locationService)
         {
             _flightRepository=flightRepository;
             _unitOfWork=unitOfWork;
             _flightPriceRepository= flightPriceRepository;
+            _iFlightPriceRepository=iFlightPriceRepository;
+            _airportRepository=airportRepository;
+            _locationService=locationService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get(
-     int page = 1,
-     int pageSize = 10,
-     string? search = null,
-     CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Get(int page = 1,int pageSize = 10,string? search = null,CancellationToken cancellationToken = default)
         {
-            var query = (await _flightRepository.GetAsync(Include: new Expression<Func<Flight, object>>[] { e => e.FlightPrice },
-                                                           cancellationToken: cancellationToken))
-                        .AsQueryable();
+            var flights = await _flightRepository.GetAsync(Include: [ e => e.FlightPrice ],cancellationToken: cancellationToken);
 
-            // Search على رقم الرحلة أو أي حقل تحبه
+            var query = flights.AsQueryable();
+
             if (!string.IsNullOrWhiteSpace(search))
             {
                 query = query.Where(f => f.FlightNumber.Contains(search));
@@ -63,8 +65,8 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOne(int id, CancellationToken cancellationToken)
         {
-            var flight = await _flightRepository.GetAsync(e=>e.Id == id,Include:[e=>e.FlightPrice], cancellationToken: cancellationToken);
-            if(flight is null)
+            var flight = await _flightRepository.GetAsync(e => e.Id == id, Include: [e => e.FlightPrice], cancellationToken: cancellationToken);
+            if (flight is null)
                 return NotFound(new ErrorModel
                 {
                     Code = "Flight Not Found",
@@ -77,22 +79,38 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] FlightRequest flightRequest,CancellationToken cancellationToken)
+        public async Task<IActionResult> Create([FromBody] FlightRequest flightRequest, CancellationToken cancellationToken)
         {
+            var fromAirport = await _airportRepository.GetOneAsync(a => a.Id == flightRequest.FromAirportId);
+            var toAirport = await _airportRepository.GetOneAsync(a => a.Id == flightRequest.ToAirportId);
+
+            if (fromAirport == null || toAirport == null)
+            {
+                return BadRequest(new { Code = "InvalidAirport", Description = "From or To Airport not found" });
+            }
+
+            var distance = _locationService.CalculateDistance(
+                fromAirport.Latitude,
+                fromAirport.Longitude,
+                toAirport.Latitude,
+                toAirport.Longitude
+            );
+
             var flight = flightRequest.Adapt<Flight>();
             flight.FlightNumber = Guid.NewGuid().ToString().Substring(0, 10);
+            flight.Distance = distance; 
 
             var flightCreated = await _flightRepository.CreateAsync(flight, cancellationToken);
             await _unitOfWork.Commit();
 
-            if (flightRequest.FlightPrice is not null )
+            if (flightRequest.FlightPrice is not null)
             {
                 foreach (var priceRequest in flightRequest.FlightPrice)
                 {
                     var flightPrice = priceRequest.Adapt<FlightPrice>();
                     flightPrice.FlightId = flightCreated.Id;
 
-                    await _flightPriceRepository.CreateAsync(flightPrice,cancellationToken);
+                    await _flightPriceRepository.CreateAsync(flightPrice, cancellationToken);
                 }
 
                 await _unitOfWork.Commit();
@@ -107,11 +125,11 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id,[FromBody] FlightRequest flightRequest, CancellationToken cancellationToken)
+        public async Task<IActionResult> Update(int id, [FromBody] FlightRequest flightRequest, CancellationToken cancellationToken)
         {
             var flight = await _flightRepository.GetOneAsync(
                 e => e.Id == id,
-                Include: [ e => e.FlightPrice ],
+                Include: new Expression<Func<Flight, object>>[] { e => e.FlightPrice },
                 cancellationToken: cancellationToken
             );
 
@@ -123,40 +141,59 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
                 });
 
             flight.FromAirportId = flightRequest.FromAirportId;
-            flight.ToAirportId = flightRequest.ToAirportId;
-            flight.Distance = flightRequest.Distance;
-            flight.DepartureTime = flightRequest.DepartureTime;
-            flight.ArrivalTime = flightRequest.ArrivalTime;
-            flight.Duration = flightRequest.Duration;
-            flight.Status = flightRequest.Status;
+            flight.ToAirportId   = flightRequest.ToAirportId;
 
-            if (flightRequest.FlightPrice is not null && flightRequest.FlightPrice.Any())
+            var fromAirport = await _airportRepository.GetOneAsync(a => a.Id == flightRequest.FromAirportId, cancellationToken: cancellationToken);
+            var toAirport = await _airportRepository.GetOneAsync(a => a.Id == flightRequest.ToAirportId, cancellationToken: cancellationToken);
+
+            if (fromAirport != null && toAirport != null)
             {
-                foreach (var priceRequest in flightRequest.FlightPrice)
+                flight.Distance = _locationService.CalculateDistance(
+                    fromAirport.Latitude,
+                    fromAirport.Longitude,
+                    toAirport.Latitude,
+                    toAirport.Longitude
+                );
+            }
+
+            flight.DepartureTime = flightRequest.DepartureTime;
+            flight.ArrivalTime   = flightRequest.ArrivalTime;
+            flight.Duration      = flightRequest.Duration;
+            flight.Status        = flightRequest.Status;
+
+            var requestPrices = flightRequest.FlightPrice ?? new List<FlightPriceRequest>();
+            var requestIds = requestPrices.Where(p => p.Id > 0).Select(p => p.Id).ToList();
+            var pricesToDelete = flight.FlightPrice.Where(p => !requestIds.Contains(p.Id)).ToList();
+
+            if (pricesToDelete.Any())
+            {
+                _iFlightPriceRepository.RemoveRange(pricesToDelete);
+            }
+
+            foreach (var priceRequest in requestPrices)
+            {
+                if (priceRequest.Id > 0)
                 {
-                    if (priceRequest.Id > 0)
+                    var existingPrice = flight.FlightPrice.FirstOrDefault(p => p.Id == priceRequest.Id);
+                    if (existingPrice == null) continue;
+
+                    existingPrice.SeatClass = priceRequest.SeatClass;
+                    existingPrice.MinSeats  = priceRequest.MinSeats;
+                    existingPrice.MaxSeats  = priceRequest.MaxSeats;
+                    existingPrice.Price     = priceRequest.Price;
+                }
+                else
+                {
+                    var newPrice = new FlightPrice
                     {
-                        var existingPrice = flight.FlightPrice
-                            .FirstOrDefault(p => p.Id == priceRequest.Id);
+                        FlightId  = flight.Id,
+                        SeatClass = priceRequest.SeatClass,
+                        MinSeats  = priceRequest.MinSeats,
+                        MaxSeats  = priceRequest.MaxSeats,
+                        Price     = priceRequest.Price
+                    };
 
-                        if (existingPrice is null)
-                            continue;
-
-                        existingPrice.SeatClass = priceRequest.SeatClass;
-                        existingPrice.MinSeats  = priceRequest.MinSeats;
-                        existingPrice.MaxSeats  = priceRequest.MaxSeats;
-                        existingPrice.Price     = priceRequest.Price;
-                    }
-                    else
-                    {
-                        var newPrice = priceRequest.Adapt<FlightPrice>();
-                        newPrice.FlightId = flight.Id;
-
-                        await _flightPriceRepository.CreateAsync(
-                            newPrice,
-                            cancellationToken
-                        );
-                    }
+                    await _flightPriceRepository.CreateAsync(newPrice, cancellationToken);
                 }
             }
 

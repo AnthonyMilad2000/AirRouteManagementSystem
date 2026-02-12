@@ -6,6 +6,8 @@
         public IFormFile? Image { get; set; }
         public double Longitude { get; set; }
         public double Latitude { get; set; }
+        public string? LocationLink { get; set; }
+
 
     }
 }

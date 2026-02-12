@@ -1,4 +1,5 @@
 ﻿using AirRouteManagementSystem.Model;
+using AirRouteManagementSystem.Model.Customer;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,9 @@ namespace AirRouteManagementSystem.DataAccess.Context
         public DbSet<Aircraft> Aircrafts { get; set; }
         public DbSet<AirCraftSubImg> AirCraftSubImgs { get; set; }
         public DbSet<FlightPrice> FlightPrices { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<Promotion> Promotions { get; set; }
         public DbSet<ApplicationUserOTP> ApplicationUserOTPs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

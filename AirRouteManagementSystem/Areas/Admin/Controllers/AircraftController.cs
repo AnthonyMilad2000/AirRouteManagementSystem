@@ -23,23 +23,19 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> Get(
-      int page = 1,
-      int pageSize = 10,
-      string? search = null,
+        public async Task<IActionResult> Get( int page = 1, int pageSize = 10,string? search = null,
       CancellationToken cancellationToken = default)
         {
-            var query = _aircraftRepository
-                .GetAsync(tracking: false, cancellationToken: cancellationToken)
-                .Result
-                .AsQueryable();
-
+            var aircrafts = await _aircraftRepository.GetAsync(tracking: false, cancellationToken: cancellationToken);
+            var query = aircrafts.AsQueryable();
             // Search
             if (!string.IsNullOrWhiteSpace(search))
             {
                 query = query.Where(a => a.AircraftCode.Contains(search)
                                       || a.AircraftCode.Contains(search));
             }
+
+          
 
             var total = query.Count();
 

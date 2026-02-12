@@ -36,12 +36,14 @@ namespace AirRouteManagementSystem.Areas.Customer.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(
             CreateBookingRequest request,
-            int userId,
+            //string userId,
             CancellationToken cancellationToken
         )
         {
             var cartItem = await _cartRepository.GetOneAsync(
-                c => c.Id == request.CartId && c.UserId == userId,
+                //c => c.Id == request.CartId && c.UserId == userId,
+                c => c.Id == request.CartId && c.UserId == "9fe9d12c-a5f2-465e-bddd-53db5fb9231b",
+
                 Include: [c => c.Flight.FlightPrice!],
                 cancellationToken: cancellationToken
             );
@@ -78,7 +80,8 @@ namespace AirRouteManagementSystem.Areas.Customer.Controllers
 
             var booking = new Booking
             {
-                UserId = userId,
+                //UserId = userId,
+                UserId = "9fe9d12c-a5f2-465e-bddd-53db5fb9231b",
                 FlightId = cartItem.FlightId,
                 Quantity = cartItem.Quantity,
                 SubPrice = subPrice,
@@ -107,7 +110,7 @@ namespace AirRouteManagementSystem.Areas.Customer.Controllers
         [HttpPost("my")]
         public async Task<IActionResult> GetMyBookings(
             BookingFilterRequest request,
-            int userId,
+            string userId,
             CancellationToken cancellationToken
         )
         {
@@ -150,13 +153,13 @@ namespace AirRouteManagementSystem.Areas.Customer.Controllers
         [HttpPost("{id}/cancel")]
         public async Task<IActionResult> CancelBooking(
             int id,
-            int userId,
+            string userId,
             CancellationToken cancellationToken
         )
         {
             var booking = await _bookingRepository.GetOneAsync(
                 b => b.Id == id && b.UserId == userId,
-                cancellationToken: cancellationToken
+                cancellationToken: cancellationToken        
             );
 
             if (booking is null)
@@ -179,6 +182,52 @@ namespace AirRouteManagementSystem.Areas.Customer.Controllers
             });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Get(int page = 1, int pageSize = 10, string? search = null, CancellationToken cancellationToken = default)
+        {
+            var bookings = await _bookingRepository.GetAsync(Include: [e=>e.Flight, e=>e.Flight.FlightPrice, e=>e.User],tracking: false, cancellationToken: cancellationToken);
+
+            var query = bookings.AsQueryable();
+
+            if (bookings is null)
+                return NotFound(new ErrorModel
+                {
+                    Code = "Not Found",
+                    Description = "No Booking Found",
+                });
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(a => a.Flight.FlightNumber.Contains(search));
+            }
+
+            var total = query.Count();
+
+            var data = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var result = new PagedResponse<Booking>
+            {
+                Data = data,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = total
+            };
+
+            return Ok(result);
+        }
+
+        [HttpGet("PaymentIssue")]
+        public IActionResult PaymentIssue()
+        {
+            return Ok(new ErrorModel
+            {
+                Code = "Payment Issue",
+                Description = "Payment Not success",
+            });
+        }
 
     }
 }

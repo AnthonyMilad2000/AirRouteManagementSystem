@@ -4,10 +4,10 @@ namespace AirRouteManagementSystem.Model
 {
     public enum FlightStatus
     {
-        Scheduled,
-        Delayed,
-        Cancelled,
-        Completed
+        Scheduled = 1,
+        Delayed = 2,
+        Cancelled = 3,
+        Completed = 4,
     }
 
     public class Flight
@@ -35,5 +35,7 @@ namespace AirRouteManagementSystem.Model
         public FlightStatus Status { get; set; }
 
         public List<FlightPrice>? FlightPrice { get; set; }
+
+
     }
 }

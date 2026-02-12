@@ -4,5 +4,6 @@ namespace AirRouteManagementSystem.DTOs.Customer.Request
     {
         public int FlightId { get; set; }
         public int Quantity { get; set; }
+        public decimal Price { get; set; }
     }
 }

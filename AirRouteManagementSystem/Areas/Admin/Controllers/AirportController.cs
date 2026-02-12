@@ -1,12 +1,13 @@
-﻿using AirRouteManagementSystem.Model;
+﻿using AirRouteManagementSystem.DTOs.Request;
+using AirRouteManagementSystem.DTOs.Response;
+using AirRouteManagementSystem.Model;
 using AirRouteManagementSystem.Repository.IRepository;
+using AirRouteManagementSystem.Services;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using AirRouteManagementSystem.DTOs.Response;
-using AirRouteManagementSystem.DTOs.Request;
-using Mapster;
 namespace AirRouteManagementSystem.Areas.Admin.Controllers
 {
     [Area("Admin")]
@@ -17,23 +18,22 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
     {
         private IRepository<Airport> _airportRepository;
         private IUnitOfWork _UnitWork;
+        private readonly ILocationService _locationService;
 
-        public AirportController(IRepository<Airport> airportRepository, IUnitOfWork unitOfWork)
+
+        public AirportController(IRepository<Airport> airportRepository, IUnitOfWork unitOfWork,ILocationService locationService)
         {
             _airportRepository=airportRepository;
             _UnitWork=unitOfWork;
+            _locationService =locationService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get(
-    int page = 1,
-    int pageSize = 10,
-    string? search = null,
-    CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Get( int page = 1,int pageSize = 10,string? search = null, CancellationToken cancellationToken = default)
         {
-            var query = (await _airportRepository.GetAsync(tracking: false, cancellationToken: cancellationToken))
-                        .AsQueryable();
-
+          
+            var airports = await _airportRepository.GetAsync(tracking: false, cancellationToken: cancellationToken);
+            var query = airports.AsQueryable();
             // Search
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -58,7 +58,7 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
             return Ok(result);
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetOne(int id,CancellationToken cancellationToken)
         {
             var airport = await _airportRepository.GetOneAsync(e=>e.Id == id ,cancellationToken: cancellationToken);
@@ -77,7 +77,17 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
         {
             var airport = airportRequest.Adapt<Airport>();
 
-            
+            if (!string.IsNullOrEmpty(airportRequest.LocationLink))
+            {
+                var coords = _locationService.ExtractCoordinates(airportRequest.LocationLink);
+
+                if (coords != null)
+                {
+                    airport.Latitude = coords.Value.lat;
+                    airport.Longitude = coords.Value.lng;
+                }
+            }
+
             if (airportRequest.Image is not null && airportRequest.Image.Length > 0)
             {
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(airportRequest.Image.FileName);
@@ -101,7 +111,7 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
         }
 
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> Edit(int id, [FromForm] AirportRequest airportRequest, CancellationToken cancellationToken)
         {
             var airportInDb = await _airportRepository.GetOneAsync(e => e.Id == id, cancellationToken: cancellationToken);
@@ -112,16 +122,12 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
                     Description = "Airport Not Found !!"
                 });
 
-
             if (airportRequest.Image != null && airportRequest.Image.Length > 0)
             {
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(airportRequest.Image.FileName);
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\airport_images", fileName);
 
-               
-
                 var oldImgPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\airport_images", airportInDb.Image);
-
                 if (System.IO.File.Exists(oldImgPath))
                 {
                     System.IO.File.Delete(oldImgPath);
@@ -134,11 +140,27 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
 
                 airportInDb.Image = fileName;
             }
-            airportInDb.Longitude = airportRequest.Longitude;
-            airportInDb.Latitude = airportRequest.Latitude;
+
+            if (!string.IsNullOrEmpty(airportRequest.LocationLink))
+            {
+                var coords = _locationService.ExtractCoordinates(airportRequest.LocationLink);
+                if (coords != null)
+                {
+                    airportInDb.Latitude  = coords.Value.lat;
+                    airportInDb.Longitude = coords.Value.lng;
+                }
+            }
+            else
+            {
+                airportInDb.Latitude  = airportRequest.Latitude;
+                airportInDb.Longitude = airportRequest.Longitude;
+            }
+
             airportInDb.Name = airportRequest.Name;
+
             _airportRepository.Update(airportInDb);
             await _UnitWork.Commit();
+
             return NoContent();
         }
 

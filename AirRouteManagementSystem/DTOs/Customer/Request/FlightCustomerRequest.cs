@@ -6,6 +6,7 @@ namespace AirRouteManagementSystem.DTOs.Customer.Request
     {
         public int FromAirportId { get; set; }
         public int ToAirportId { get; set; }
+
         public DateTime Date { get; set; }
     }
 }

@@ -22,5 +22,7 @@ namespace AirRouteManagementSystem.DTOs.Response
 
         public FlightStatus Status { get; set; }
         public List<FlightPriceResponse> FlightPrice { get; set; } = [];
+
+        public Airport Airport { get; set; }
     }
 }

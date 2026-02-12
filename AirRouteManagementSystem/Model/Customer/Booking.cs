@@ -9,8 +9,8 @@ namespace AirRouteManagementSystem.Model.Customer
         public int Id { get; set; }
 
         [Required]
-        public int UserId { get; set; }
-
+        public string UserId { get; set; }
+      
         [Required]
         public int FlightId { get; set; }
 
@@ -38,5 +38,7 @@ namespace AirRouteManagementSystem.Model.Customer
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        [ForeignKey(nameof(UserId))]
+        public ApplicationUser User { get; set; }
     }
 }

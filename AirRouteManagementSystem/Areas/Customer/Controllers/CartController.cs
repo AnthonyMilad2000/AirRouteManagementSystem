@@ -32,7 +32,7 @@ namespace AirRouteManagementSystem.Areas.Customer.Controllers
         // GET: /Customer/Cart/{userId}
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetCart(
-            int userId,
+            string userId,
             CancellationToken cancellationToken
         )
         {
@@ -57,10 +57,8 @@ namespace AirRouteManagementSystem.Areas.Customer.Controllers
 
         // POST: /Customer/Cart
         [HttpPost]
-        public async Task<IActionResult> AddToCart(
-            AddToCartRequest request,
-            int userId,
-            CancellationToken cancellationToken
+        public async Task<IActionResult> AddToCart( AddToCartRequest request, //string userId,
+                                                                              CancellationToken cancellationToken
         )
         {
             var flight = await _flightRepository.GetOneAsync(
@@ -73,9 +71,11 @@ namespace AirRouteManagementSystem.Areas.Customer.Controllers
 
             var cartItem = new Cart
             {
-                UserId = userId,
+                //UserId = userId,
+                UserId = "9fe9d12c-a5f2-465e-bddd-53db5fb9231b",
                 FlightId = request.FlightId,
-                Quantity = request.Quantity
+                Quantity = request.Quantity,
+                Price = request.Price
             };
 
             await _cartRepository.CreateAsync(cartItem, cancellationToken);

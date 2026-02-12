@@ -21,6 +21,8 @@
 
         public AircraftType AircraftType { get; set; }
         public CapacityType CapacityType { get; set; }
+        public string AircraftTypeName => AircraftType.ToString();
+        public string CapacityTypeName => CapacityType.ToString();
 
         public int Capacity { get; set; }
         public decimal MaxRangeKm { get; set; }

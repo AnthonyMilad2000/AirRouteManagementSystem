@@ -25,13 +25,17 @@ namespace AirRouteManagementSystem.Areas.Customer.Controllers
         public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
             var flights = await _flightRepository.GetAsync(
+                 Include: [f => f.FromAirport, f => f.ToAirport, f=>f.FlightPrice],
                 tracking: false,
                 cancellationToken: cancellationToken
             );
 
-            var response = flights
-                .Select(f => f.Adapt<FlightCustomerResponse>())
-                .AsQueryable();
+            //var response = flights
+            //    .Select(f => f.Adapt<FlightCustomerResponse>())
+            //    .AsQueryable();
+
+            var response = flights.AsQueryable();
+
 
             return Ok(response);
         }

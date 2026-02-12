@@ -32,9 +32,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Areas\Customer\" />
 		<Folder Include="Areas\Identity\" />
-		<Folder Include="Services\Interface\" />
 		<Folder Include="wwwroot\aircraft_images\" />
 		<Folder Include="wwwroot\airport_images\" />
 	</ItemGroup>

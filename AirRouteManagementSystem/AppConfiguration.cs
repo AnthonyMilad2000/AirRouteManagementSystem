@@ -1,4 +1,5 @@
 ﻿using AirRouteManagementSystem.Model;
+using AirRouteManagementSystem.Model.Customer;
 using AirRouteManagementSystem.Repository;
 using AirRouteManagementSystem.Repository.IRepository;
 using AirRouteManagementSystem.Services;
@@ -22,10 +23,16 @@ namespace AirRouteManagementSystem
             services.AddScoped<IRepository<Airport>, Repository<Airport>>();
             services.AddScoped<IRepository<Flight>, Repository<Flight>>();
             services.AddScoped<IRepository<FlightPrice>, Repository<FlightPrice>>();
+            services.AddScoped<IRepository<ApplicationUser>, Repository<ApplicationUser>>();
             services.AddScoped<IAircraftSubImagesRepository, AircraftSubImageRepository>();
+            services.AddScoped<IFlightPriceRepository, FlightPriceRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWorks>();
 
             services.AddScoped<IRepository<ApplicationUserOTP>, Repository<ApplicationUserOTP>>();
+            services.AddScoped<ILocationService, LocationService>();
+            services.AddScoped<IRepository<Booking>, Repository<Booking>>();
+            services.AddScoped<IRepository<Cart>, Repository<Cart>>();
+            services.AddScoped<IRepository<Promotion>, Repository<Promotion>>();
 
             // Service
             services.AddTransient<ITokenService, TokenService>();

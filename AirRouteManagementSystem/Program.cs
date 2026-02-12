@@ -15,14 +15,14 @@ namespace AirRouteManagementSystem
 
             builder.Services.AddCors(options =>
             {
-                options.AddDefaultPolicy(
-                                  policy =>
-                                  {
-                                      policy.WithOrigins("http://localhost:4200")
-                                      .AllowAnyMethod()
-                                      .AllowAnyHeader()
-                                      .AllowCredentials();
-                                  });
+                options.AddPolicy("AllowAngular",
+        policy =>
+        {
+            policy
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
             });
 
             // ===============================
@@ -141,19 +141,31 @@ namespace AirRouteManagementSystem
             // ===============================
             // Middleware
             // ===============================
-            if (app.Environment.IsDevelopment())
-            {
+            
                 app.MapOpenApi();
                 app.MapScalarApiReference();
-            }
-            app.UseCors();
+
+
+
+
+            app.UseCors("AllowAngular");
+
 
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapHub<ChatHub>("/ChatHub");
 
+
             app.MapControllers();
+
+            app.MapGet("/", () => Results.Json(new
+            {
+                status = "OK",
+                app = "Air Route Management System API",
+                message = "API is running successfully ??"
+            }));
+            app.UseStaticFiles();
 
             app.Run();
         }
