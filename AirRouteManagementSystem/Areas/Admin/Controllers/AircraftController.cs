@@ -1,6 +1,7 @@
 ﻿
 using AirRouteManagementSystem.Repository.IRepository;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AirRouteManagementSystem.Areas.Admin.Controllers
@@ -8,6 +9,8 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
     [Area("Admin")]
     [Route("[area]/[controller]")]
     [ApiController]
+    [Authorize(Roles = $"{SD.SuperAdminRole}, {SD.AdminRole},{SD.EmployeeRole}")]
+
     public class AircraftController : ControllerBase
     {
         private IRepository<Aircraft> _aircraftRepository;
@@ -119,6 +122,7 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
             });
         }
 
+        [Authorize(Roles = $"{SD.SuperAdminRole}, {SD.AdminRole}")]
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(int id, AircraftRequest aircraftRequest, List<IFormFile> SubImgs, CancellationToken cancellationToken)
@@ -187,6 +191,9 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
 
             return NoContent();
         }
+
+        [Authorize(Roles = $"{SD.SuperAdminRole}, {SD.AdminRole}")]
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {

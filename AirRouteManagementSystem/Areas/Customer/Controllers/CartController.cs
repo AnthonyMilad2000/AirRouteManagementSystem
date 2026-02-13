@@ -5,6 +5,7 @@ using AirRouteManagementSystem.Model.Customer;
 using AirRouteManagementSystem.Repository.IRepository;
 using AirRouteManagementSystem.UnitOfWork.Interface;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AirRouteManagementSystem.Areas.Customer.Controllers
@@ -12,6 +13,7 @@ namespace AirRouteManagementSystem.Areas.Customer.Controllers
     [Area("Customer")]
     [Route("[area]/[controller]")]
     [ApiController]
+    [Authorize]
     public class CartController : ControllerBase
     {
         private readonly IRepository<Cart> _cartRepository;

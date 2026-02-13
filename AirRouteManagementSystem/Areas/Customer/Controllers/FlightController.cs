@@ -4,6 +4,7 @@ using AirRouteManagementSystem.Model;
 using AirRouteManagementSystem.Model.Customer;
 using AirRouteManagementSystem.Repository.IRepository;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AirRouteManagementSystem.Areas.Customer.Controllers
@@ -11,6 +12,7 @@ namespace AirRouteManagementSystem.Areas.Customer.Controllers
     [Area("Customer")]
     [Route("[area]/[controller]")]
     [ApiController]
+    
     public class FlightController : ControllerBase
     {
         private readonly IRepository<Flight> _flightRepository;
@@ -29,7 +31,12 @@ namespace AirRouteManagementSystem.Areas.Customer.Controllers
                 tracking: false,
                 cancellationToken: cancellationToken
             );
-
+            if (flights is null)
+                return NotFound(new ErrorModel
+                {
+                    Code = "Not Found",
+                    Description = "Not Found Flight/s"
+                });
             //var response = flights
             //    .Select(f => f.Adapt<FlightCustomerResponse>())
             //    .AsQueryable();
@@ -42,26 +49,56 @@ namespace AirRouteManagementSystem.Areas.Customer.Controllers
 
         // POST: /Customer/Flight/search
         [HttpPost("search")]
-        public async Task<IActionResult> Search(
-            FlightCustomerRequest request,
-            CancellationToken cancellationToken
-        )
+        //[HttpPost]
+        public async Task<IActionResult> Search(FlightCustomerRequest flightCustomerRequest, CancellationToken cancellationToken)
         {
             var flights = await _flightRepository.GetAsync(
-                f =>
-                    f.FromAirportId == request.FromAirportId &&
-                    f.ToAirportId == request.ToAirportId &&
-                    f.DepartureTime.Date == request.Date.Date,
+                 Include: [f => f.FromAirport, f => f.ToAirport, f => f.FlightPrice],
                 tracking: false,
                 cancellationToken: cancellationToken
             );
 
-            var response = flights
-                .Select(f => f.Adapt<FlightResponse>())
-                .AsQueryable();
+            if (flights is null)
+                return NotFound(new ErrorModel
+                {
+                    Code = "Not Found",
+                    Description = "Not Found Flight/s"
+                });
+
+            if (flightCustomerRequest.FromAirportId > 0 && flightCustomerRequest.ToAirportId > 0)
+            {
+                flights = flights.Where(e => e.FromAirportId == flightCustomerRequest.FromAirportId && e.ToAirportId == flightCustomerRequest.ToAirportId).ToList();
+            }
+            //var response = flights
+            //    .Select(f => f.Adapt<FlightCustomerResponse>())
+            //    .AsQueryable();
+
+            var response = flights.AsQueryable();
+
 
             return Ok(response);
         }
+
+        //public async Task<IActionResult> Search(
+        //    FlightCustomerRequest request,
+        //    CancellationToken cancellationToken
+        //)
+        //{
+        //    var flights = await _flightRepository.GetAsync(
+        //        f =>
+        //            f.FromAirportId == request.FromAirportId &&
+        //            f.ToAirportId == request.ToAirportId &&
+        //            f.DepartureTime.Date == request.Date.Date,
+        //        tracking: false,
+        //        cancellationToken: cancellationToken
+        //    );
+
+        //    var response = flights
+        //        .Select(f => f.Adapt<FlightResponse>())
+        //        .AsQueryable();
+
+        //    return Ok(response);
+        //}
 
         // POST: /Customer/Flight/Filter
 

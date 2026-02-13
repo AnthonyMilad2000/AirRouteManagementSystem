@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Stripe.Checkout;
 using System.Security.Claims;
@@ -9,6 +10,7 @@ namespace AirRouteManagementSystem.Areas.Customer.Controllers
     [Area("Customer")]
     [Route("[Area]/[controller]")]
     [ApiController]
+    [Authorize]
     public class PaymentController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;

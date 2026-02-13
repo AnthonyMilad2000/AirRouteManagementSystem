@@ -4,6 +4,7 @@ using AirRouteManagementSystem.Model;
 using AirRouteManagementSystem.Repository.IRepository;
 using AirRouteManagementSystem.Services;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
     [Area("Admin")]
     [Route("[area]/[controller]")]
     [ApiController]
+    [Authorize(Roles = $"{SD.SuperAdminRole}, {SD.AdminRole},{SD.EmployeeRole}")]
     public class FlightController : ControllerBase
     {
         private IRepository<Flight> _flightRepository;
@@ -124,6 +126,8 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
                 });
         }
 
+        [Authorize(Roles = $"{SD.SuperAdminRole}, {SD.AdminRole}")]
+
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] FlightRequest flightRequest, CancellationToken cancellationToken)
         {
@@ -205,6 +209,7 @@ namespace AirRouteManagementSystem.Areas.Admin.Controllers
                 Description = "Flight updated successfully"
             });
         }
+        [Authorize(Roles = $"{SD.SuperAdminRole}, {SD.AdminRole}")]
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)

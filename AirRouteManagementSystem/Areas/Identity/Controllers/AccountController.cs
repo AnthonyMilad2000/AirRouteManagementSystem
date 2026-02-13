@@ -236,6 +236,7 @@ namespace AirRouteManagementSystem.Areas.Identity.Controllers
 
             return Ok();
         }
+        [Authorize(Roles = $"{SD.SuperAdminRole}, {SD.AdminRole},{SD.EmployeeRole}")]
 
         [HttpGet]
         public async Task<IActionResult> Get(int page = 1, int pageSize = 10, string? search = null, CancellationToken cancellationToken = default)
